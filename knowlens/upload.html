@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KnowLens Static Demo - Upload</title>
+  <style>
+    :root {
+      --text: #eaf1ff;
+      --muted: #9cb0d6;
+      --primary: #6e7cff;
+      --primary-2: #7e5cff;
+      --success: #57d18d;
+      --danger: #ff7f9f;
+      --line: rgba(122, 153, 255, 0.18);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top center, rgba(82, 116, 255, 0.22), transparent 28%),
+        linear-gradient(180deg, #09142f 0%, #030815 58%, #01050f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(0, 92, 255, 0.10), transparent 20%, transparent 80%, rgba(0, 92, 255, 0.10)),
+        radial-gradient(circle at 50% 18%, rgba(125, 176, 255, 0.10), transparent 35%);
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      background: rgba(6, 14, 34, 0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand .icon {
+      font-size: 26px;
+      filter: drop-shadow(0 8px 18px rgba(126, 92, 255, 0.45));
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a,
+    .logout-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active,
+    .logout-link:hover {
+      color: #fff;
+      background: rgba(110, 124, 255, 0.14);
+    }
+
+    .user-chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(10, 18, 36, 0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dfe8ff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 60px 28px 72px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.04;
+      font-weight: 800;
+      background: linear-gradient(180deg, #9dc1ff 0%, #6d8fff 52%, #8b78ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.02fr 1.18fr;
+      gap: 26px;
+      align-items: start;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(26, 39, 70, 0.92) 0%, rgba(20, 31, 56, 0.92) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 22px 24px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .card-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .card-body {
+      padding: 22px 24px 24px;
+    }
+
+    .upload-zone {
+      position: relative;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 28px;
+      border-radius: 24px;
+      border: 1.5px dashed rgba(154, 182, 255, 0.22);
+      background: linear-gradient(180deg, rgba(18, 29, 52, 0.84), rgba(15, 24, 44, 0.84));
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .upload-zone.dragover {
+      border-color: rgba(126, 124, 255, 0.65);
+      background: linear-gradient(180deg, rgba(34, 47, 83, 0.92), rgba(18, 28, 51, 0.92));
+      transform: translateY(-1px);
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .upload-content {
+      max-width: 380px;
+    }
+
+    .upload-icon {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 18px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      background: linear-gradient(180deg, rgba(118, 140, 255, 0.18), rgba(126, 92, 255, 0.12));
+      border: 1px solid rgba(140, 163, 255, 0.18);
+    }
+
+    .upload-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .file-list {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .file-item {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(12, 22, 43, 0.88);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .file-meta {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag {
+      flex-shrink: 0;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: rgba(110, 124, 255, 0.16);
+      color: #dfe6ff;
+      border: 1px solid rgba(146, 159, 255, 0.18);
+    }
+
+    .note-box,
+    .bundle-box,
+    .scope-help,
+    .path-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .note-box,
+    .bundle-box,
+    .path-box {
+      background: rgba(7, 16, 34, 0.72);
+    }
+
+    .scope-help {
+      background: linear-gradient(180deg, rgba(14, 24, 47, 0.96), rgba(10, 17, 34, 0.96));
+    }
+
+    .note-box strong,
+    .bundle-box strong,
+    .scope-help strong,
+    .path-box strong {
+      color: #f1f5ff;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #dfe8ff;
+    }
+
+    .required::after {
+      content: " *";
+      color: #8fb4ff;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      outline: none;
+      color: var(--text);
+      background: rgba(9, 17, 35, 0.86);
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: rgba(125, 176, 255, 0.42);
+      box-shadow: 0 0 0 4px rgba(110, 124, 255, 0.10);
+    }
+
+    .textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .hint,
+    .readonly-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary-2), var(--primary));
+      box-shadow: 0 18px 36px rgba(110, 124, 255, 0.25);
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 40px rgba(110, 124, 255, 0.3);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status {
+      min-height: 24px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .status.success { color: var(--success); }
+    .status.error { color: var(--danger); }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 42px 16px 48px;
+      }
+
+      .nav-inner {
+        padding: 18px 16px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-head,
+      .card-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .upload-zone {
+        min-height: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+/* Static demo adapter for GitHub Pages. Backend calls are replaced with dummy responses. */
+(function () {
+  const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+
+  const mockResults = [
+    {
+      title: "Project Handover Knowledge",
+      source: "project-handover-guideline.pdf",
+      access_level: "project",
+      document_type: "Project Document",
+      division: "Project Management",
+      client: "bank-mandiri",
+      project: "A5",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "Project Manager",
+      source_origin: "Project Archive",
+      relative_path: "knowledge/project/bank-mandiri/A5/project-handover-guideline.pdf",
+      final_score: 0.91,
+      snippet: "[Static demo] This document explains project handover context, onboarding checklist, known issues, ownership, and validated operational knowledge for a new team member."
+    },
+    {
+      title: "Incident Resolution Guide",
+      source: "incident-resolution-payment-gateway.pdf",
+      access_level: "division",
+      document_type: "Troubleshooting Guide",
+      division: "IT Development",
+      client: "internal",
+      project: "INT-02",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "Knowledge Master",
+      source_origin: "Lessons Learned Session",
+      relative_path: "knowledge/division/it-development/incident-resolution-payment-gateway.pdf",
+      final_score: 0.86,
+      snippet: "[Static demo] This guide summarizes recurring incident patterns, resolution steps, escalation contacts, and traceable lessons learned."
+    },
+    {
+      title: "Onboarding Checklist for Project Team",
+      source: "onboarding-checklist-project-team.docx",
+      access_level: "public",
+      document_type: "SOP",
+      division: "Project Management",
+      client: "-",
+      project: "-",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "PMO",
+      source_origin: "Internal Repository",
+      relative_path: "knowledge/public/onboarding-checklist-project-team.docx",
+      final_score: 0.82,
+      snippet: "[Static demo] A reusable checklist for preparing access, documents, project context, and handover sessions for new project members."
+    }
+  ];
+
+  const mockSources = mockResults.slice(0, 2).map(item => ({
+    title: item.title,
+    source: item.source,
+    relative_path: item.relative_path
+  }));
+
+  function jsonResponse(payload) {
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  window.fetch = async function (input, options) {
+    const url = String(input || "");
+
+    if (url.includes("__STATIC_DEMO__/search")) {
+      return jsonResponse({ results: mockResults });
+    }
+
+    if (url.includes("__STATIC_DEMO__/answer")) {
+      return jsonResponse({
+        answer: "[Static demo] Based on accessible organizational knowledge, a new project team should receive a validated handover package, onboarding checklist, project context, known issues, access scope, and traceable source documents. In the real prototype, this answer would be generated from semantic retrieval results while respecting the active user's access rights.",
+        sources: mockSources
+      });
+    }
+
+    if (url.includes("__STATIC_DEMO__/upload")) {
+      return jsonResponse({
+        message: "[Static demo] Knowledge metadata has been validated and queued for indexing. No real file was uploaded because this version runs fully on static HTML.",
+        saved_files: []
+      });
+    }
+
+    if (originalFetch) return originalFetch(input, options);
+    throw new Error("Fetch is not available in this browser.");
+  };
+})();
+</script>
+
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="icon">🧠</span>
+        <span>KnowLens</span>
+      </div>
+      <div class="nav-right">
+        <div class="user-chip" id="activeUserChip">User aktif: -</div>
+        <nav class="nav-links">
+          <a href="search.html">Search</a>
+          <a href="answer.html">Answer</a>
+          <a href="upload.html" class="active">Upload</a>
+        </nav>
+        <a href="#" class="logout-link" id="logoutBtn">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Knowledge Injection</h1>
+      <p>
+        Tambahkan knowledge baru ke dalam Intelligence Engine dengan metadata yang jelas,
+        keterlacakan sumber, dan pengaturan akses yang sesuai dengan konteks divisi maupun proyek.
+      </p>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <div class="card-head">
+          <h2>Upload Knowledge File</h2>
+          <p>
+            Unggah satu atau beberapa file sekaligus. Semua file dalam satu sesi upload ini akan memakai metadata yang sama.
+          </p>
+        </div>
+        <div class="card-body">
+          <label class="upload-zone" id="uploadZone" for="fileInput">
+            <input id="fileInput" type="file" accept=".pdf,.docx,.txt" multiple />
+            <div class="upload-content">
+              <div class="upload-icon">📄</div>
+              <div class="upload-title">Click to select or drag files here</div>
+              <div class="upload-text">
+                Masukkan dokumen knowledge yang ingin diproses ke repository dan semantic index.
+                Format untuk demo ini dibatasi ke PDF, DOCX, dan TXT.
+              </div>
+            </div>
+          </label>
+
+          <div class="file-list hidden" id="fileList"></div>
+
+          <div class="bundle-box">
+            <strong>Bundle upload:</strong>
+            cocok untuk file yang memang berasal dari konteks yang sama, misalnya satu proyek yang sama,
+            satu divisi yang sama, atau satu kelompok knowledge publik yang sama.
+          </div>
+
+          <div class="note-box">
+            <strong>Catatan:</strong>
+            Dokumen yang diunggah sebaiknya bukan sekadar data mentah, tetapi sudah berupa pengetahuan
+            yang layak digunakan kembali oleh orang lain.
+          </div>
+
+          <div class="path-box">
+            <strong>Planned Path:</strong><br />
+            <span id="pathPreviewText">Path penyimpanan akan ditentukan otomatis setelah metadata utama dipilih.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Knowledge Metadata</h2>
+          <p>
+            Lengkapi informasi knowledge agar sistem dapat menentukan konteks, keterlacakan, dan siapa saja
+            yang berhak mengaksesnya.
+          </p>
+        </div>
+        <div class="card-body">
+          <form id="knowledgeForm">
+            <div class="form-grid">
+              <div class="field full">
+                <label class="required" for="title">Knowledge Title</label>
+                <input class="input" id="title" name="title" type="text" placeholder="Contoh: Incident Resolution Guide for Payment Gateway" required />
+              </div>
+
+              <div class="field full">
+                <label class="required" for="description">Description</label>
+                <textarea class="textarea" id="description" name="description" placeholder="Ringkasan singkat tentang isi knowledge, konteks penggunaan, atau masalah yang dibahas." required></textarea>
+              </div>
+
+              <div class="field">
+                <label class="required" for="documentType">Document Type</label>
+                <select class="select" id="documentType" name="documentType" required>
+                  <option value="">Pilih jenis dokumen</option>
+                  <option>SOP</option>
+                  <option>Project Document</option>
+                  <option>Meeting Note</option>
+                  <option>Troubleshooting Guide</option>
+                  <option>Technical Design</option>
+                  <option>Policy</option>
+                  <option>Lessons Learned</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="required" for="accessScope">Access Scope</label>
+                <select class="select" id="accessScope" name="accessScope" required>
+                  <option value="">Pilih cakupan akses</option>
+                </select>
+              </div>
+
+              <div class="field hidden" id="divisionField">
+                <label class="required" for="division">Division</label>
+                <select class="select" id="division" name="division">
+                  <option value="">Pilih divisi</option>
+                </select>
+                <div class="readonly-note">Division mengikuti user yang sedang login.</div>
+              </div>
+
+              <div class="field hidden" id="clientField">
+                <label class="required" for="client">Client</label>
+                <select class="select" id="client" name="client">
+                  <option value="">Pilih client</option>
+                </select>
+              </div>
+
+              <div class="field hidden" id="projectField">
+                <label class="required" for="project">Project</label>
+                <select class="select" id="project" name="project">
+                  <option value="">Pilih project</option>
+                </select>
+                <div class="hint">Project yang muncul mengikuti assignment user yang sedang aktif.</div>
+              </div>
+
+              <div class="field">
+                <label class="required" for="sourceOrigin">Source Origin</label>
+                <select class="select" id="sourceOrigin" name="sourceOrigin" required>
+                  <option value="">Pilih asal sumber</option>
+                  <option>Internal Repository</option>
+                  <option>Project Archive</option>
+                  <option>Meeting Outcome</option>
+                  <option>Email / Formal Communication</option>
+                  <option>Lessons Learned Session</option>
+                  <option>Manual Upload</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="required" for="owner">Knowledge Owner</label>
+                <input class="input" id="owner" name="owner" type="text" placeholder="Contoh: Project Manager / Division PIC" required />
+              </div>
+
+              <div class="field">
+                <label for="year">Year / Period</label>
+                <input class="input" id="year" name="year" type="number" min="2000" max="2100" placeholder="2026" />
+              </div>
+
+              <div class="field">
+                <label for="country">Country</label>
+                <input class="input" id="country" name="country" type="text" placeholder="Indonesia" />
+              </div>
+
+              <div class="field">
+                <label for="city">City</label>
+                <input class="input" id="city" name="city" type="text" placeholder="Jakarta" />
+              </div>
+            </div>
+
+            <div class="scope-help">
+              <strong>Access Scope Guide:</strong><br />
+              <strong>Public</strong> untuk knowledge umum yang boleh dicari semua user terdaftar.<br />
+              <strong>Division Only</strong> untuk knowledge yang hanya relevan bagi satu divisi tertentu.<br />
+              <strong>Project Only</strong> untuk knowledge lintas divisi yang hanya dapat diakses oleh anggota proyek terkait.
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="btn" id="submitBtn" disabled>Save &amp; Process Knowledge</button>
+              <div class="status" id="statusText">Pilih file dan lengkapi metadata utama untuk memulai proses.</div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = '__STATIC_DEMO__';
+
+    function getSessionUser() {
+      try {
+        const raw = sessionStorage.getItem('knowlensUser');
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function ensureUser() {
+      const user = getSessionUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return null;
+      }
+      return user;
+    }
+
+    const currentUser = ensureUser();
+
+    const activeUserChip = document.getElementById('activeUserChip');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+    const fileList = document.getElementById('fileList');
+    const form = document.getElementById('knowledgeForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusText = document.getElementById('statusText');
+    const pathPreviewText = document.getElementById('pathPreviewText');
+
+    const accessScope = document.getElementById('accessScope');
+    const divisionField = document.getElementById('divisionField');
+    const clientField = document.getElementById('clientField');
+    const projectField = document.getElementById('projectField');
+
+    const divisionSelect = document.getElementById('division');
+    const clientSelect = document.getElementById('client');
+    const projectSelect = document.getElementById('project');
+    const documentTypeSelect = document.getElementById('documentType');
+
+    if (currentUser) {
+      activeUserChip.textContent = `User aktif: ${currentUser.displayName} • ${currentUser.division}`;
+    }
+
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      sessionStorage.removeItem('knowlensUser');
+      sessionStorage.removeItem('knowlensUsername');
+      window.location.href = 'login.html';
+    });
+
+    function bytesToSize(bytes) {
+      if (!bytes) return '0 B';
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+    }
+
+    function slugify(value) {
+      return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[\\/]+/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9_-]/g, '');
+    }
+
+    function renderFiles(files) {
+      if (!files.length) {
+        fileList.classList.add('hidden');
+        fileList.innerHTML = '';
+        return;
+      }
+
+      fileList.classList.remove('hidden');
+      fileList.innerHTML = Array.from(files).map(file => `
+        <div class="file-item">
+          <div class="file-meta">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${bytesToSize(file.size)}</div>
+          </div>
+          <div class="tag">${(file.name.split('.').pop() || '').toUpperCase()}</div>
+        </div>
+      `).join('');
+    }
+
+    function formatScopeLabel(scope) {
+      if (scope === 'public') return 'Public';
+      if (scope === 'division') return 'Division Only';
+      if (scope === 'project') return 'Project Only';
+      return scope;
+    }
+
+    function clientLabel(client) {
+      const labels = {
+        'bank-mandiri': 'Bank Mandiri',
+        'china-life': 'China Life',
+        'internal': 'Internal Company'
+      };
+      return labels[client] || client;
+    }
+
+    function buildScopeOptions() {
+      accessScope.innerHTML = '<option value="">Pilih cakupan akses</option>';
+      (currentUser.allowedScopes || []).forEach(scope => {
+        const opt = document.createElement('option');
+        opt.value = scope;
+        opt.textContent = formatScopeLabel(scope);
+        accessScope.appendChild(opt);
+      });
+    }
+
+    function buildDivisionOption() {
+      divisionSelect.innerHTML = '<option value="">Pilih divisi</option>';
+      const opt = document.createElement('option');
+      opt.value = currentUser.division;
+      opt.textContent = currentUser.division;
+      divisionSelect.appendChild(opt);
+      divisionSelect.value = currentUser.division;
+    }
+
+    function buildClientOptions() {
+      clientSelect.innerHTML = '<option value="">Pilih client</option>';
+      const seen = new Set();
+
+      (currentUser.projects || []).forEach(project => {
+        if (seen.has(project.client)) return;
+        seen.add(project.client);
+
+        const opt = document.createElement('option');
+        opt.value = project.client;
+        opt.textContent = clientLabel(project.client);
+        clientSelect.appendChild(opt);
+      });
+    }
+
+    function populateProjects() {
+      const client = clientSelect.value;
+      const projects = (currentUser.projects || []).filter(project => project.client === client);
+
+      projectSelect.innerHTML =
+        '<option value="">Pilih project</option>' +
+        projects.map(project => `<option value="${project.code}">${project.code} - ${project.name}</option>`).join('');
+    }
+
+    function updatePathPreview() {
+      const scope = accessScope.value;
+      const docType = slugify(documentTypeSelect.value || 'unknown');
+      let plannedPath = 'Path penyimpanan akan ditentukan otomatis setelah metadata utama dipilih.';
+
+      if (scope === 'public') {
+        plannedPath = `docs/public/${docType}/<filename>`;
+      } else if (scope === 'division') {
+        plannedPath = `docs/division/${slugify(currentUser.division)}/${docType}/<filename>`;
+      } else if (scope === 'project') {
+        const client = slugify(clientSelect.value || 'client');
+        const project = slugify(projectSelect.value || 'project');
+        plannedPath = `docs/project/${client}/${project}/${docType}/<filename>`;
+      }
+
+      pathPreviewText.textContent = plannedPath;
+    }
+
+    function syncScopeFields() {
+      const scope = accessScope.value;
+
+      divisionField.classList.add('hidden');
+      clientField.classList.add('hidden');
+      projectField.classList.add('hidden');
+
+      divisionSelect.required = false;
+      clientSelect.required = false;
+      projectSelect.required = false;
+
+      if (scope === 'division') {
+        divisionField.classList.remove('hidden');
+        divisionSelect.required = true;
+        divisionSelect.value = currentUser.division;
+      }
+
+      if (scope === 'project') {
+        clientField.classList.remove('hidden');
+        projectField.classList.remove('hidden');
+        clientSelect.required = true;
+        projectSelect.required = true;
+      }
+
+      updatePathPreview();
+      updateSubmitState();
+    }
+
+    function updateSubmitState() {
+      const scope = accessScope.value;
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const documentType = documentTypeSelect.value;
+      const sourceOrigin = document.getElementById('sourceOrigin').value;
+      const owner = document.getElementById('owner').value.trim();
+      const hasFile = fileInput.files && fileInput.files.length > 0;
+
+      let scopeValid = !!scope;
+      if (scope === 'division') scopeValid = !!divisionSelect.value;
+      if (scope === 'project') scopeValid = !!clientSelect.value && !!projectSelect.value;
+
+      const valid = hasFile && title && description && documentType && sourceOrigin && owner && scopeValid;
+      submitBtn.disabled = !valid;
+      updatePathPreview();
+    }
+
+    fileInput.addEventListener('change', () => {
+      renderFiles(fileInput.files);
+      updateSubmitState();
+
+      statusText.textContent = fileInput.files.length
+        ? `${fileInput.files.length} file dipilih. Semua file pada sesi ini akan memakai metadata yang sama.`
+        : 'Pilih file dan lengkapi metadata utama untuk memulai proses.';
+
+      statusText.className = 'status';
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+      });
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt.files && dt.files.length) {
+        fileInput.files = dt.files;
+        renderFiles(fileInput.files);
+        updateSubmitState();
+
+        statusText.textContent = `${dt.files.length} file ditambahkan melalui drag & drop. Semua file akan memakai metadata yang sama.`;
+        statusText.className = 'status';
+      }
+    });
+
+    accessScope.addEventListener('change', syncScopeFields);
+    documentTypeSelect.addEventListener('change', updateSubmitState);
+    clientSelect.addEventListener('change', () => {
+      populateProjects();
+      updateSubmitState();
+    });
+    projectSelect.addEventListener('change', updateSubmitState);
+    form.addEventListener('input', updateSubmitState);
+    form.addEventListener('change', updateSubmitState);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (submitBtn.disabled) return;
+
+      const formData = new FormData();
+      Array.from(fileInput.files).forEach(file => formData.append('files', file));
+
+      formData.append('username', currentUser.username);
+      formData.append('title', document.getElementById('title').value.trim());
+      formData.append('description', document.getElementById('description').value.trim());
+      formData.append('documentType', documentTypeSelect.value);
+      formData.append('accessScope', accessScope.value);
+      formData.append('division', divisionSelect.value || '');
+      formData.append('client', clientSelect.value || '');
+      formData.append('project', projectSelect.value || '');
+      formData.append('sourceOrigin', document.getElementById('sourceOrigin').value);
+      formData.append('owner', document.getElementById('owner').value.trim());
+      formData.append('year', document.getElementById('year').value || '');
+      formData.append('country', document.getElementById('country').value.trim() || '');
+      formData.append('city', document.getElementById('city').value.trim() || '');
+
+      statusText.textContent = 'Uploading files, saving shared metadata, and preparing semantic indexing...';
+      statusText.className = 'status';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      try {
+        const response = await fetch(`${API}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Upload knowledge gagal diproses.');
+        }
+
+        statusText.textContent = data.message || 'Knowledge bundle berhasil disimpan dan index sedang diperbarui.';
+        statusText.className = 'status success';
+        submitBtn.textContent = 'Save & Process Knowledge';
+        updateSubmitState();
+      } catch (error) {
+        console.error(error);
+        statusText.textContent = error.message || 'Terjadi error saat upload knowledge.';
+        statusText.className = 'status error';
+        submitBtn.textContent = 'Save & Process Knowledge';
+        updateSubmitState();
+      }
+    });
+
+    buildScopeOptions();
+    buildDivisionOption();
+    buildClientOptions();
+    updateSubmitState();
+  </script>
+</body>
+</html>

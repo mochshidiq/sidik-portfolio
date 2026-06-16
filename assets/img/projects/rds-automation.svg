@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="45%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <radialGradient id="r" cx="70%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="760" fill="url(#g)"/>
+  <rect width="1200" height="760" fill="url(#r)"/>
+  <rect x="80" y="90" width="1040" height="580" rx="44" fill="#ffffff" fill-opacity="0.10" stroke="#ffffff" stroke-opacity="0.28"/>
+  <circle cx="1030" cy="170" r="72" fill="#ffffff" fill-opacity="0.12"/>
+  <circle cx="960" cy="250" r="26" fill="#ffffff" fill-opacity="0.18"/>
+  <text x="110" y="180" fill="#bfdbfe" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" letter-spacing="4">DOCUMENT AUTOMATION</text>
+  <text x="110" y="300" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="800">RDS Automation</text>
+  <text x="110" y="380" fill="#dbeafe" font-family="Arial, Helvetica, sans-serif" font-size="32">Visual placeholder — replace with screenshot, mockup, or diagram</text>
+  <rect x="110" y="470" width="250" height="18" rx="9" fill="#ffffff" fill-opacity="0.35"/>
+  <rect x="110" y="512" width="470" height="18" rx="9" fill="#ffffff" fill-opacity="0.20"/>
+  <rect x="110" y="554" width="360" height="18" rx="9" fill="#ffffff" fill-opacity="0.15"/>
+</svg>

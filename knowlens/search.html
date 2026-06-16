@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KnowLens Static Demo - Search</title>
+  <style>
+    :root {
+      --text: #eaf1ff;
+      --muted: #9cb0d6;
+      --primary: #6e7cff;
+      --primary-2: #7e5cff;
+      --success: #57d18d;
+      --danger: #ff7f9f;
+      --line: rgba(122, 153, 255, 0.18);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top center, rgba(82, 116, 255, 0.22), transparent 28%),
+        linear-gradient(180deg, #09142f 0%, #030815 58%, #01050f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 92, 255, 0.10), transparent 20%, transparent 80%, rgba(0, 92, 255, 0.10)),
+        radial-gradient(circle at 50% 18%, rgba(125, 176, 255, 0.10), transparent 35%);
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      background: rgba(6, 14, 34, 0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand .icon {
+      font-size: 26px;
+      filter: drop-shadow(0 8px 18px rgba(126, 92, 255, 0.45));
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a,
+    .logout-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active,
+    .logout-link:hover {
+      color: #fff;
+      background: rgba(110, 124, 255, 0.14);
+    }
+
+    .user-chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(10, 18, 36, 0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dfe8ff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 56px 28px 72px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.04;
+      font-weight: 800;
+      background: linear-gradient(180deg, #9dc1ff 0%, #6d8fff 52%, #8b78ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(26, 39, 70, 0.92) 0%, rgba(20, 31, 56, 0.92) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel + .panel {
+      margin-top: 22px;
+    }
+
+    .panel-head {
+      padding: 22px 24px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .panel-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .panel-body {
+      padding: 22px 24px 24px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .filter-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      outline: none;
+      color: var(--text);
+      background: rgba(9, 17, 35, 0.86);
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .input:focus {
+      border-color: rgba(125, 176, 255, 0.42);
+      box-shadow: 0 0 0 4px rgba(110, 124, 255, 0.10);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary-2), var(--primary));
+      box-shadow: 0 18px 36px rgba(110, 124, 255, 0.25);
+      transition: 0.2s ease;
+      min-width: 150px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 40px rgba(110, 124, 255, 0.3);
+    }
+
+    .meta-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(10, 18, 36, 0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--success); }
+
+    .result-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .result-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(10, 18, 36, 0.66);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .result-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .result-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: #f3f6ff;
+    }
+
+    .result-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .score-badge {
+      flex-shrink: 0;
+      padding: 9px 12px;
+      border-radius: 14px;
+      background: rgba(110, 124, 255, 0.14);
+      border: 1px solid rgba(146, 159, 255, 0.18);
+      color: #e6ebff;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      min-width: 112px;
+    }
+
+    .snippet {
+      color: #dde7ff;
+      font-size: 14px;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .path-line {
+      margin-top: 12px;
+      color: #b8c8eb;
+      font-size: 12px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 14px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1080px) {
+      .filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 42px 16px 48px;
+      }
+
+      .nav-inner {
+        padding: 18px 16px;
+      }
+
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .result-top {
+        flex-direction: column;
+      }
+
+      .score-badge {
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+/* Static demo adapter for GitHub Pages. Backend calls are replaced with dummy responses. */
+(function () {
+  const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+
+  const mockResults = [
+    {
+      title: "Project Handover Knowledge",
+      source: "project-handover-guideline.pdf",
+      access_level: "project",
+      document_type: "Project Document",
+      division: "Project Management",
+      client: "bank-mandiri",
+      project: "A5",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "Project Manager",
+      source_origin: "Project Archive",
+      relative_path: "knowledge/project/bank-mandiri/A5/project-handover-guideline.pdf",
+      final_score: 0.91,
+      snippet: "[Static demo] This document explains project handover context, onboarding checklist, known issues, ownership, and validated operational knowledge for a new team member."
+    },
+    {
+      title: "Incident Resolution Guide",
+      source: "incident-resolution-payment-gateway.pdf",
+      access_level: "division",
+      document_type: "Troubleshooting Guide",
+      division: "IT Development",
+      client: "internal",
+      project: "INT-02",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "Knowledge Master",
+      source_origin: "Lessons Learned Session",
+      relative_path: "knowledge/division/it-development/incident-resolution-payment-gateway.pdf",
+      final_score: 0.86,
+      snippet: "[Static demo] This guide summarizes recurring incident patterns, resolution steps, escalation contacts, and traceable lessons learned."
+    },
+    {
+      title: "Onboarding Checklist for Project Team",
+      source: "onboarding-checklist-project-team.docx",
+      access_level: "public",
+      document_type: "SOP",
+      division: "Project Management",
+      client: "-",
+      project: "-",
+      country: "Indonesia",
+      city: "Jakarta",
+      year: "2026",
+      owner: "PMO",
+      source_origin: "Internal Repository",
+      relative_path: "knowledge/public/onboarding-checklist-project-team.docx",
+      final_score: 0.82,
+      snippet: "[Static demo] A reusable checklist for preparing access, documents, project context, and handover sessions for new project members."
+    }
+  ];
+
+  const mockSources = mockResults.slice(0, 2).map(item => ({
+    title: item.title,
+    source: item.source,
+    relative_path: item.relative_path
+  }));
+
+  function jsonResponse(payload) {
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  window.fetch = async function (input, options) {
+    const url = String(input || "");
+
+    if (url.includes("__STATIC_DEMO__/search")) {
+      return jsonResponse({ results: mockResults });
+    }
+
+    if (url.includes("__STATIC_DEMO__/answer")) {
+      return jsonResponse({
+        answer: "[Static demo] Based on accessible organizational knowledge, a new project team should receive a validated handover package, onboarding checklist, project context, known issues, access scope, and traceable source documents. In the real prototype, this answer would be generated from semantic retrieval results while respecting the active user's access rights.",
+        sources: mockSources
+      });
+    }
+
+    if (url.includes("__STATIC_DEMO__/upload")) {
+      return jsonResponse({
+        message: "[Static demo] Knowledge metadata has been validated and queued for indexing. No real file was uploaded because this version runs fully on static HTML.",
+        saved_files: []
+      });
+    }
+
+    if (originalFetch) return originalFetch(input, options);
+    throw new Error("Fetch is not available in this browser.");
+  };
+})();
+</script>
+
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="icon">🧠</span>
+        <span>KnowLens</span>
+      </div>
+      <div class="nav-right">
+        <div class="user-chip" id="activeUserChip">User aktif: -</div>
+        <nav class="nav-links">
+          <a href="search.html" class="active">Search</a>
+          <a href="answer.html">Answer</a>
+          <a href="upload.html">Upload</a>
+        </nav>
+        <a href="#" class="logout-link" id="logoutBtn">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Knowledge Search</h1>
+      <p>
+        Temukan knowledge yang paling relevan berdasarkan konteks pengguna aktif,
+        metadata dokumen, dan hasil semantic retrieval yang diprioritaskan untuk kebutuhan organisasi.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Cari knowledge</h2>
+        <p>Masukkan kata kunci, lalu gunakan filter metadata jika memang diperlukan.</p>
+      </div>
+      <div class="panel-body">
+        <form id="searchForm">
+          <div class="search-row">
+            <input id="queryInput" class="input" type="text" placeholder="Silakan masukkan kata kunci pengetahuan" />
+            <button type="submit" class="btn">Search Knowledge</button>
+          </div>
+
+          <div class="filter-grid">
+            <input id="divisionInput" class="input" type="text" placeholder="Filter division" />
+            <input id="clientInput" class="input" type="text" placeholder="Filter client" />
+            <input id="projectInput" class="input" type="text" placeholder="Filter project" />
+            <input id="countryInput" class="input" type="text" placeholder="Filter country" />
+            <input id="cityInput" class="input" type="text" placeholder="Filter city" />
+            <input id="yearInput" class="input" type="text" placeholder="Filter year" />
+          </div>
+        </form>
+
+        <div class="meta-row" id="searchMeta"></div>
+        <div class="status" id="statusText">Siapkan kata kunci, lalu mulai pencarian knowledge.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Search Results</h2>
+        <p>Hasil di bawah ini hanya menampilkan knowledge yang relevan dan tetap mengikuti hak akses user aktif.</p>
+      </div>
+      <div class="panel-body">
+        <div class="result-list" id="resultList">
+          <div class="empty-state">Belum ada pencarian. Masukkan kata kunci untuk melihat hasil knowledge yang relevan.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = '__STATIC_DEMO__';
+
+    function getSessionUser() {
+      try {
+        const raw = sessionStorage.getItem('knowlensUser');
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function ensureUser() {
+      const user = getSessionUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return null;
+      }
+      return user;
+    }
+
+    const currentUser = ensureUser();
+    const activeUserChip = document.getElementById('activeUserChip');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const searchForm = document.getElementById('searchForm');
+    const queryInput = document.getElementById('queryInput');
+    const divisionInput = document.getElementById('divisionInput');
+    const clientInput = document.getElementById('clientInput');
+    const projectInput = document.getElementById('projectInput');
+    const countryInput = document.getElementById('countryInput');
+    const cityInput = document.getElementById('cityInput');
+    const yearInput = document.getElementById('yearInput');
+    const resultList = document.getElementById('resultList');
+    const statusText = document.getElementById('statusText');
+    const searchMeta = document.getElementById('searchMeta');
+
+    function scopeLabel(scope) {
+      if (scope === 'public') return 'Public';
+      if (scope === 'division') return 'Division';
+      if (scope === 'project') return 'Project';
+      return scope;
+    }
+
+    if (currentUser) {
+      activeUserChip.textContent = `User aktif: ${currentUser.displayName} • ${currentUser.division}`;
+      const projects = (currentUser.projects || []).map(p => `${p.client}:${p.code}`).join(', ') || '-';
+
+      searchMeta.innerHTML = `
+        <span class="pill">Division: ${currentUser.division}</span>
+        <span class="pill">Allowed Scope: ${(currentUser.allowedScopes || []).map(scopeLabel).join(', ')}</span>
+        <span class="pill">Projects: ${projects}</span>
+      `;
+    }
+
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      sessionStorage.removeItem('knowlensUser');
+      sessionStorage.removeItem('knowlensUsername');
+      window.location.href = 'login.html';
+    });
+
+    function toPercent(value) {
+      const safe = Number.isFinite(Number(value)) ? Number(value) : 0;
+      const clamped = Math.max(0, Math.min(1, safe));
+      return Math.round(clamped * 100);
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderResults(items) {
+      if (!items || !items.length) {
+        resultList.innerHTML = '<div class="empty-state">Knowledge belum ditemukan untuk kata kunci ini. Coba gunakan istilah yang lebih spesifik atau berbeda.</div>';
+        return;
+      }
+
+      resultList.innerHTML = items.map(item => {
+        const scoreText = `${toPercent(item.final_score ?? item.score ?? 0)}% Similarity`;
+        const title = item.title || item.source || 'Untitled';
+        const source = item.source || '-';
+        const access = item.access_level || '-';
+        const documentType = item.document_type || '-';
+        const division = item.division || '-';
+        const client = item.client || '-';
+        const project = item.project || '-';
+        const country = item.country || '-';
+        const city = item.city || '-';
+        const year = item.year || '-';
+        const owner = item.owner || '-';
+        const sourceOrigin = item.source_origin || '-';
+        const path = item.relative_path || '-';
+        const snippet = item.snippet || item.text || '-';
+
+        return `
+          <article class="result-card">
+            <div class="result-top">
+              <div>
+                <h3 class="result-title">${escapeHtml(title)}</h3>
+                <div class="result-sub">
+                  File: ${escapeHtml(source)} • Access: ${escapeHtml(access)} • Type: ${escapeHtml(documentType)}
+                </div>
+                <div class="result-sub">
+                  Division: ${escapeHtml(division)} • Client: ${escapeHtml(client)} • Project: ${escapeHtml(project)}
+                </div>
+                <div class="result-sub">
+                  Country: ${escapeHtml(country)} • City: ${escapeHtml(city)} • Year: ${escapeHtml(year)}
+                </div>
+                <div class="result-sub">
+                  Owner: ${escapeHtml(owner)} • Source Origin: ${escapeHtml(sourceOrigin)}
+                </div>
+              </div>
+              <div class="score-badge">${scoreText}</div>
+            </div>
+
+            <p class="snippet">${escapeHtml(snippet)}</p>
+            <div class="path-line"><strong>Path:</strong> ${escapeHtml(path)}</div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    searchForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = queryInput.value.trim();
+
+      if (!q) {
+        statusText.textContent = 'Silakan masukkan kata kunci terlebih dahulu.';
+        statusText.className = 'status error';
+        return;
+      }
+
+      statusText.textContent = 'Mencari knowledge yang paling relevan...';
+      statusText.className = 'status';
+      resultList.innerHTML = '<div class="empty-state">Pencarian sedang diproses...</div>';
+
+      const params = new URLSearchParams({
+        q,
+        username: currentUser.username
+      });
+
+      if (divisionInput.value.trim()) params.append('division', divisionInput.value.trim());
+      if (clientInput.value.trim()) params.append('client', clientInput.value.trim());
+      if (projectInput.value.trim()) params.append('project', projectInput.value.trim());
+      if (countryInput.value.trim()) params.append('country', countryInput.value.trim());
+      if (cityInput.value.trim()) params.append('city', cityInput.value.trim());
+      if (yearInput.value.trim()) params.append('year', yearInput.value.trim());
+
+      try {
+        const response = await fetch(`${API}/search?${params.toString()}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Pencarian gagal diproses.');
+        }
+
+        renderResults(data.results || []);
+        statusText.textContent = `Pencarian selesai. Menampilkan ${data.results?.length || 0} hasil yang paling relevan.`;
+        statusText.className = 'status success';
+      } catch (error) {
+        console.error(error);
+        resultList.innerHTML = '<div class="empty-state">Terjadi kendala saat menghubungi layanan pencarian. Pastikan backend sudah berjalan.</div>';
+        statusText.textContent = error.message || 'Terjadi error saat pencarian.';
+        statusText.className = 'status error';
+      }
+    });
+  </script>
+</body>
+</html>
