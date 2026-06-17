@@ -551,3 +551,31 @@ h2 {
 .archive-grid article:first-child {
   display: none;
 }
+
+.prototype-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.prototype-gallery img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.prototype-gallery img:first-child {
+  grid-column: 1 / -1;
+  max-height: 360px;
+}
+
+@media (max-width: 880px) {
+  .prototype-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .prototype-gallery img:first-child {
+    max-height: none;
+  }
+}
