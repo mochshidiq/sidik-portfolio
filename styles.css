@@ -574,11 +574,11 @@ section#research-prototype .prototype-gallery img {
 
 section#research-prototype .prototype-gallery img:first-child {
   grid-column: 1 / -1 !important;
-  max-height: 380px !important;
+  max-height: 280px !important;
 }
 
 section#research-prototype .prototype-gallery img:not(:first-child) {
-  min-height: 115px !important;
+  min-height: 215px !important;
 }
 
 @media (max-width: 880px) {
